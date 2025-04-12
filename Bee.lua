@@ -2108,6 +2108,7 @@ SMODS.Joker {
 	pools = {["Bee"] = true},
 	pos = { x = 0, y = 0 },
 	cost = 2,
+	immutable = true,
 	loc_vars = function(self, info_queue, card)
 		return { vars = { card and math.min(card.ability.extra.total_bees, 100), card and card.ability.extra.bee, card and card.ability.extra.bold } }
 	end,
