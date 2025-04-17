@@ -54,6 +54,12 @@ function beeCountChangedNegative()
 	return false
 end
 
+local function pickNewWord(card)
+	local word_list = { "BUG", "BUZZ", "BEE", "BOOP", "BANANA", "BALATRO"}
+	card.ability.extra.word = word_list[math.random(#word_list)]
+	card.ability.extra.progress = ""
+end
+
 function HasMaximized()
 	local has_maximized = false
 	for i = 1, #G.jokers.cards do
@@ -914,9 +920,40 @@ SMODS.Joker {
 		},
 }
 
+-- if context.end_of_round			
+		-- and not context.repetition
+		-- and not context.individual
+		-- and not card.ability.extra.active
+		-- and not context.blueprint
+		-- then
+		-- 	local beeCount = GetBees()
+			
+		-- 	card.ability.extra.chips = math.min((card.ability.extra.chips + card.ability.extra.chip_mod * beeCount), Global_Cap)
+		-- 	card_eval_status_text(
+		-- 		card,
+		-- 		"extra",
+		-- 		nil,
+		-- 		nil,
+		-- 		nil,
+		-- 		{
+		-- 			message = localize({ type = "variable", key = "a_chips", vars = { math.min((card.ability.extra.chip_mod * beeCount), Global_Cap)} }),
+		-- 			colour = G.C.CHIPS,
+		-- 		}
+		-- 	)
+		-- end
+
+		-- if context.joker_main then
+		-- 	if card.ability.extra.chips > 0 then
+		-- 		return {
+		-- 			chip_mod =  math.min(card.ability.extra.chips, Global_Cap),
+		-- 			message = localize { type = 'variable', key = 'a_chips', vars = { math.min(card.ability.extra.chips, Global_Cap) } }
+		-- 		}
+		-- 	end
+		-- end
+
 SMODS.Joker {
 	key = 'spellingbee',
-	config = { extra = { chips = 0, chip_mod = 5, bee = true, bold = 4} },
+	config = { extra = {word = "", progress = "", bee = true, bold = 4} },
 	rarity = 1,
 	atlas = 'beeatlas',
 	blueprint_compat = true,
@@ -924,37 +961,68 @@ SMODS.Joker {
 	pos = { x = 3, y = 0 },
 	cost = 2,
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card and math.min(card.ability.extra.chips, Global_Cap), card and math.min(card.ability.extra.chip_mod, Global_Cap), card and card.ability.extra.bee, card and card.ability.extra.bold } }
+		return { vars = { card and card.ability.extra.word, card and card.ability.extra.progress} }
+	end,
+	add_to_deck = function(self, card, context)
+		pickNewWord(card)
+	end,
+	remove_from_deck = function(self, card, context)
+		-- Clear values when the Joker leaves the deck
+		card.ability.extra.word = ""
+		card.ability.extra.progress = ""
 	end,
 	calculate = function(self, card, context)
-		if context.end_of_round			
-		and not context.repetition
-		and not context.individual
-		and not card.ability.extra.active
-		and not context.blueprint
-		then
-			local beeCount = GetBees()
+		if context.joker_main and not context.blueprint and not context.repetition then
+			local rank 
+			local scoredLetter
+			local inProgressLetter = 0
 			
-			card.ability.extra.chips = math.min((card.ability.extra.chips + card.ability.extra.chip_mod * beeCount), Global_Cap)
-			card_eval_status_text(
-				card,
-				"extra",
-				nil,
-				nil,
-				nil,
-				{
-					message = localize({ type = "variable", key = "a_chips", vars = { math.min((card.ability.extra.chip_mod * beeCount), Global_Cap)} }),
-					colour = G.C.CHIPS,
-				}
-			)
-		end
+			for i = 1, #context.full_hand do
+				rank = SMODS.Ranks[context.full_hand[i].base.value].key
+	
+				if rank == "King" or rank == "Queen" or rank == "Jack" or rank == "10" then 
+					inProgressLetter = inProgressLetter + 10
+				elseif rank == "9" then
+					inProgressLetter = inProgressLetter + 9
+				elseif rank == "8" then
+					inProgressLetter = inProgressLetter + 8
+				elseif rank == "7" then
+					inProgressLetter = inProgressLetter + 7
+				elseif rank == "6" then
+					inProgressLetter = inProgressLetter + 6
+				elseif rank == "5" then
+					inProgressLetter = inProgressLetter + 5
+				elseif rank == "4" then
+					inProgressLetter = inProgressLetter + 4
+				elseif rank == "3" then
+					inProgressLetter = inProgressLetter + 3
+				elseif rank == "2" then
+					inProgressLetter = inProgressLetter + 2
+				elseif rank == "Ace" then
+					inProgressLetter = inProgressLetter + 1
+				end
+			end
+	
+			local clampedValue = math.min(inProgressLetter, 26)
+			print (clampedValue)
+			if clampedValue >= 1 then
+				scoredLetter = string.char(64 + clampedValue)
 
-		if context.joker_main then
-			if card.ability.extra.chips > 0 then
-				return {
-					chip_mod =  math.min(card.ability.extra.chips, Global_Cap),
-					message = localize { type = 'variable', key = 'a_chips', vars = { math.min(card.ability.extra.chips, Global_Cap) } }
-				}
+				local progress = card.ability.extra.progress or ""
+				local word = card.ability.extra.word or ""
+				local next_expected = word:sub(#progress + 1, #progress + 1)
+
+				if scoredLetter == next_expected then
+					card.ability.extra.progress = progress .. scoredLetter
+				else
+					pickNewWord(card) -- Reset everything on failure
+				end
+			end
+			
+			-- Check if the word is successfully spelled
+			if card.ability.extra.progress == card.ability.extra.word then
+				print("Yippie") -- Successfully spelled the word
+				pickNewWord(card) -- Reset everything
 			end
 		end
     end,

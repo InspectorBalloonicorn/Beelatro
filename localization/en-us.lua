@@ -49,14 +49,15 @@ return {
 		    }
         },
         j_bee_spellingbee = {
-            name = 'Spelling Bee',
-		    text = {
-                "When round ends, this gains {C:chips}+#2#{} Chips",
-			    "for each {C:attention}Bee Joker{} you currently have",
-			    "{C:inactive}(Currently {C:chips}+#1# {C:inactive}Chips)",
-			    "{C:inactive}This counts as a Bee Joker"
-		    }
-        },
+			name = 'Spelling Bee',
+			text = {
+				"At the end of the round, you can earn a bonus by spelling a random word.",
+				"This Joker presents a word, and you can spell it by playing cards",
+				"that match the values of the letters in the word.",
+				"Word: {C:inactive}#1#",
+				"Progress: {C:inactive}#2#",
+			}
+		},
         j_bee_bigbee = {
             name = 'Big Bee',
 		    text = {
