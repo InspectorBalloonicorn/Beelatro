@@ -55,7 +55,7 @@ function beeCountChangedNegative()
 end
 
 local function pickNewWord(card)
-	local word_list = { "BUG", "BUZZ", "BEE", "BOOP", "BANANA", "BALATRO"}
+	local word_list = { "BUG"} -- "BUZZ", "BEE", "BOOP", "BANANA", "BALATRO"}
 	card.ability.extra.word = word_list[math.random(#word_list)]
 	card.ability.extra.progress = ""
 end
@@ -1014,15 +1014,25 @@ SMODS.Joker {
 
 				if scoredLetter == next_expected then
 					card.ability.extra.progress = progress .. scoredLetter
-				else
-					pickNewWord(card) -- Reset everything on failure
+				-- else
+				-- 	pickNewWord(card) -- Reset everything on failure
 				end
 			end
 			
 			-- Check if the word is successfully spelled
 			if card.ability.extra.progress == card.ability.extra.word then
+				if card.ability.extra.word == "BUG" then
+					play_sound("timpani")
+					local card = create_card("Code", G.consumeables, nil, nil, nil, nil, "c_bee_bug")
+					card:set_edition({
+						negative = true,
+					})
+					card:add_to_deck()
+					G.consumeables:emplace(card)
+					card:juice_up(0.3, 0.5)
+				end
 				print("Yippie") -- Successfully spelled the word
-				pickNewWord(card) -- Reset everything
+				pickNewWord(card) -- Reset word
 			end
 		end
     end,
