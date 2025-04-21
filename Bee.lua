@@ -1044,9 +1044,8 @@ SMODS.Joker {
 							
 							return true
 						end}))
-	
-						--playing_card_joker_effects({true})
 				end
+				
 				pickNewWord(card) -- Reset word
 			end
 
