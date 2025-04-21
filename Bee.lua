@@ -55,7 +55,7 @@ function beeCountChangedNegative()
 end
 
 local function pickNewWord(card)
-	local word_list = { "BUG"} -- "BUZZ", "BEE", "BOOP", "BANANA", "BALATRO"}
+	local word_list = { "ACE" } --"BUG" "BUZZ", "BEE", "BOOP", "BANANA", "BALATRO"}
 	card.ability.extra.word = word_list[math.random(#word_list)]
 	card.ability.extra.progress = ""
 end
@@ -1004,7 +1004,6 @@ SMODS.Joker {
 			end
 	
 			local clampedValue = math.min(inProgressLetter, 26)
-			print (clampedValue)
 			if clampedValue >= 1 then
 				scoredLetter = string.char(64 + clampedValue)
 
@@ -1030,10 +1029,28 @@ SMODS.Joker {
 					card:add_to_deck()
 					G.consumeables:emplace(card)
 					card:juice_up(0.3, 0.5)
+				elseif card.ability.extra.word == "ACE" then --TODO
+					G.E_MANAGER:add_event(Event({
+						func = function() 
+							local _suit = pseudorandom_element({'S','H','D','C'}, pseudoseed('spellingbee_create'))
+							local _card = create_playing_card({
+								front = G.P_CARDS[_suit..'_'.."A"],
+								center = G.P_CENTERS.c_base}, G.hand, nil, nil, nil)
+							_card:set_edition({
+								bee_striped = true,
+							})
+							G.GAME.blind:debuff_card(_card)
+							G.hand:sort()
+							
+							return true
+						end}))
+	
+						--playing_card_joker_effects({true})
 				end
-				print("Yippie") -- Successfully spelled the word
 				pickNewWord(card) -- Reset word
 			end
+
+			
 		end
     end,
     cry_credits = {
