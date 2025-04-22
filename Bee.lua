@@ -54,10 +54,34 @@ function beeCountChangedNegative()
 	return false
 end
 
+local function getNextExpectedLetter(card)
+	local progress = card.ability.extra.progress or ""
+	local word = card.ability.extra.word or ""
+	return word:sub(#progress + 1, #progress + 1)
+end
+
+local function getNextExpectedLetterValue(card)
+	local next_letter = getNextExpectedLetter(card)
+	if next_letter and #next_letter > 0 then
+		return string.byte(next_letter) - 64
+	end
+	return nil
+end
+
 local function pickNewWord(card)
-	local word_list = { "ACE" } --"BUG" "BUZZ", "BEE", "BOOP", "BANANA", "BALATRO"}
+	local word_list = { "BUG", "ACE", "NANA" } -- Add more words here
 	card.ability.extra.word = word_list[math.random(#word_list)]
 	card.ability.extra.progress = ""
+	card.ability.extra.next_expected = getNextExpectedLetterValue(card)
+
+	card_eval_status_text(
+					card,
+					"extra",
+					nil,
+					nil,
+					nil,
+					{ message = "Spell " .. card.ability.extra.word }
+					)
 end
 
 function HasMaximized()
@@ -953,7 +977,7 @@ SMODS.Joker {
 
 SMODS.Joker {
 	key = 'spellingbee',
-	config = { extra = {word = "", progress = "", bee = true, bold = 4} },
+	config = { extra = {word = "", progress = "", next_expected = "", bee = true, bold = 4} },
 	rarity = 1,
 	atlas = 'beeatlas',
 	blueprint_compat = true,
@@ -961,7 +985,7 @@ SMODS.Joker {
 	pos = { x = 3, y = 0 },
 	cost = 2,
 	loc_vars = function(self, info_queue, card)
-		return { vars = { card and card.ability.extra.word, card and card.ability.extra.progress} }
+		return { vars = { card and card.ability.extra.word, card and card.ability.extra.progress, card.ability.extra.next_expected} }
 	end,
 	add_to_deck = function(self, card, context)
 		pickNewWord(card)
@@ -970,6 +994,7 @@ SMODS.Joker {
 		-- Clear values when the Joker leaves the deck
 		card.ability.extra.word = ""
 		card.ability.extra.progress = ""
+		card.ability.extra.next_expected = ""
 	end,
 	calculate = function(self, card, context)
 		if context.joker_main and not context.blueprint and not context.repetition then
@@ -1004,20 +1029,29 @@ SMODS.Joker {
 			end
 	
 			local clampedValue = math.min(inProgressLetter, 26)
-			if clampedValue >= 1 then
-				scoredLetter = string.char(64 + clampedValue)
+				if clampedValue >= 1 then
 
-				local progress = card.ability.extra.progress or ""
-				local word = card.ability.extra.word or ""
-				local next_expected = word:sub(#progress + 1, #progress + 1)
+					local progress = card.ability.extra.progress or ""
+					local word = card.ability.extra.word or ""
+					local required_value = getNextExpectedLetterValue(card)
+					card.ability.extra.next_expected = required_value
 
-				if scoredLetter == next_expected then
-					card.ability.extra.progress = progress .. scoredLetter
-				-- else
-				-- 	pickNewWord(card) -- Reset everything on failure
+					if clampedValue == required_value then
+						local scoredLetter = string.char(64 + clampedValue)
+						card.ability.extra.progress = progress .. scoredLetter
+						card.ability.extra.next_expected = getNextExpectedLetterValue(card)
+
+						card_eval_status_text(
+						card,
+						"extra",
+						nil,
+						nil,
+						nil,
+						{ message = "Nice!" }
+						)
+					end
 				end
-			end
-			
+
 			-- Check if the word is successfully spelled
 			if card.ability.extra.progress == card.ability.extra.word then
 				if card.ability.extra.word == "BUG" then
@@ -1030,6 +1064,7 @@ SMODS.Joker {
 					G.consumeables:emplace(card)
 					card:juice_up(0.3, 0.5)
 				elseif card.ability.extra.word == "ACE" then --TODO
+					play_sound("timpani")
 					G.E_MANAGER:add_event(Event({
 						func = function() 
 							local _suit = pseudorandom_element({'S','H','D','C'}, pseudoseed('spellingbee_create'))
@@ -1041,15 +1076,19 @@ SMODS.Joker {
 							})
 							G.GAME.blind:debuff_card(_card)
 							G.hand:sort()
-							
+							card:juice_up(0.3, 0.5)
 							return true
 						end}))
+				elseif card.ability.extra.word == "NANA" then
+						play_sound("timpani")
+						local _tag = Tag("tag_cry_banana")
+						_tag.ability.shiny = cry_rollshinybool()
+						add_tag(_tag)
+						card:juice_up(0.3, 0.5)
 				end
-				
+
 				pickNewWord(card) -- Reset word
 			end
-
-			
 		end
     end,
     cry_credits = {

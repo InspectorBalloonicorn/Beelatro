@@ -51,11 +51,12 @@ return {
         j_bee_spellingbee = {
 			name = 'Spelling Bee',
 			text = {
-				"At the end of the round, you can earn a bonus by spelling a random word.",
-				"This Joker presents a word, and you can spell it by playing cards",
-				"that match the values of the letters in the word.",
+				"Use alphanumerics to spell a word",
+				"based on total ranks scored",
+				"at end of round, receive spelled item",
 				"Word: {C:inactive}#1#",
 				"Progress: {C:inactive}#2#",
+				"Next Letter: {C:inactive}#3#"
 			}
 		},
         j_bee_bigbee = {
