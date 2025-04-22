@@ -69,7 +69,7 @@ local function getNextExpectedLetterValue(card)
 end
 
 local function pickNewWord(card)
-	local word_list = { "BUG", "ACE", "NANA" } -- Add more words here
+	local word_list = {"BUG", "ACE", "NANA", "JOKER", "WHEEL"}--{ "BUG", "ACE", "NANA", "JOKER", "WHEEL" } -- Add more words here
 	card.ability.extra.word = word_list[math.random(#word_list)]
 	card.ability.extra.progress = ""
 	card.ability.extra.next_expected = getNextExpectedLetterValue(card)
@@ -1085,7 +1085,46 @@ SMODS.Joker {
 						_tag.ability.shiny = cry_rollshinybool()
 						add_tag(_tag)
 						card:juice_up(0.3, 0.5)
+				elseif card.ability.extra.word == "JOKER" then
+						play_sound("timpani")
+						local sellcreatejoker = 1
+						G.GAME.joker_buffer = G.GAME.joker_buffer + sellcreatejoker
+						G.E_MANAGER:add_event(Event({
+							func = function()
+								for i = 1, sellcreatejoker do
+									local card = create_card("Joker", G.jokers, nil, nil, nil, nil, nil, "spellingbee")
+									card:add_to_deck()
+									card:set_edition({
+										bee_striped = true,
+									})
+									G.jokers:emplace(card)
+									card:start_materialize()
+									G.GAME.joker_buffer = 0
+								end
+								card:juice_up(0.3, 0.5)
+								return true
+							end,
+						}))
+						card:juice_up(0.3, 0.5)
+				elseif card.ability.extra.word == "WHEEL" then
+						play_sound("timpani")
+						local card = create_card("Tarot", G.consumeables, nil, nil, nil, nil, "c_wheel_of_fortune")
+						card:set_edition({
+							negative = true,
+						})
+						card:add_to_deck()
+						G.consumeables:emplace(card)
+						card:juice_up(0.3, 0.5)
+
+						local card2 = create_card("Tarot", G.consumeables, nil, nil, nil, nil, "c_wheel_of_fortune")
+						card2:set_edition({
+							negative = true,
+						})
+						card2:add_to_deck()
+						G.consumeables:emplace(card2)
+						card:juice_up(0.3, 0.5)
 				end
+			
 
 				pickNewWord(card) -- Reset word
 			end
