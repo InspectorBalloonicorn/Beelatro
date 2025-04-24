@@ -69,7 +69,7 @@ local function getNextExpectedLetterValue(card)
 end
 
 local function pickNewWord(card)
-	local word_list = {"BUG", "ACE", "NANA", "JOKER", "WHEEL"}--{ "BUG", "ACE", "NANA", "JOKER", "WHEEL" } -- Add more words here
+	local word_list = {"BUG", "ACE", "NANA", "JOKER", "WHEEL", "BEE"}--{ "BUG", "ACE", "NANA", "JOKER", "WHEEL", "BEE",  } -- Add more words here
 	card.ability.extra.word = word_list[math.random(#word_list)]
 	card.ability.extra.progress = ""
 	card.ability.extra.next_expected = getNextExpectedLetterValue(card)
@@ -1123,10 +1123,23 @@ SMODS.Joker {
 						card2:add_to_deck()
 						G.consumeables:emplace(card2)
 						card:juice_up(0.3, 0.5)
-				end
-			
-
-				pickNewWord(card) -- Reset word
+					elseif card.ability.extra.word == "BEE" then
+						play_sound("timpani")
+						local card = create_card(
+							"Joker",
+						G.jokers,
+						nil,
+						nil,
+						nil,
+						nil,
+						"j_bee_jimbee"
+						)
+						card:set_edition({bee_striped = true})
+						card:add_to_deck()
+						G.jokers:emplace(card)
+						card:juice_up(0.3, 0.5)
+					end
+			pickNewWord(card) -- Reset word	
 			end
 		end
     end,

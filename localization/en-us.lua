@@ -51,9 +51,9 @@ return {
         j_bee_spellingbee = {
 			name = 'Spelling Bee',
 			text = {
-				"Use alphanumerics to spell a word",
-				"based on total ranks scored",
-				"at end of round, receive spelled item",
+				"Spell a word using alphanumerics",
+				"based on total ranks played",
+				"When you spell a word, get a bonus",
 				"Word: {C:inactive}#1#",
 				"Progress: {C:inactive}#2#",
 				"Next Letter: {C:inactive}#3#"
