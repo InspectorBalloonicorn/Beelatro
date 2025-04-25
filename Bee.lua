@@ -132,6 +132,7 @@ function Get_random_bee_card()
         	{name = "j_bee_queenbee", chance = 3},
 			{name = "j_bee_grim_queen", chance = 3},
 			{name = "j_bee_buzzkill", chance = 3},
+			{name = "j_bee_honeydrops", chance = 4},
         	{name = "j_bee_hivemind", chance = 5},
         	{name = "j_bee_benson", chance = 100}
     	}
