@@ -5,7 +5,7 @@
 --- MOD_DESCRIPTION: This Mod adds BEES!
 --- PREFIX: bee
 --- BADGE_COLOUR: 708b91
---- DEPENDENCIES:Cryptid>=0.5.3<=0.5.5
+--- DEPENDENCIES:Cryptid>=0.5.3<=0.5.5b
 --- VERSION: 0.9.2
 
 ----------------------------------------------
